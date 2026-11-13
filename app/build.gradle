@@ -2,6 +2,14 @@ plugins {
     id 'com.android.application'
 }
 
+def releaseSigning = [
+    storeFile: providers.environmentVariable('ANDROID_KEYSTORE_PATH').orNull,
+    storePassword: providers.environmentVariable('ANDROID_KEYSTORE_PASSWORD').orNull,
+    keyAlias: providers.environmentVariable('ANDROID_KEY_ALIAS').orNull,
+    keyPassword: providers.environmentVariable('ANDROID_KEY_PASSWORD').orNull
+]
+def hasReleaseSigning = releaseSigning.values().every { it }
+
 android {
     namespace "com.azurenight.g2048"
     compileSdk 37
@@ -9,18 +17,31 @@ android {
         applicationId 'com.azurenight.g2048'
         minSdk 26
         targetSdk 37
-        versionCode 101
-        versionName '1.2'
+        versionCode project.findProperty('ciVersionCode')?.toInteger() ?: 101
+        versionName project.findProperty('ciVersionName')?.toString() ?: '1.2'
+    }
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(releaseSigning.storeFile)
+                storePassword releaseSigning.storePassword
+                keyAlias releaseSigning.keyAlias
+                keyPassword releaseSigning.keyPassword
+            }
+        }
     }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    // This is important, it will run lint checks but won't abort build
+    // Keep local lint nonfatal, but make lint findings fail the CI validation job.
     lint {
-        abortOnError false
+        abortOnError project.hasProperty('ciBuild')
     }
 }
 
