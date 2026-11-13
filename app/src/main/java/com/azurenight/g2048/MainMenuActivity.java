@@ -93,89 +93,86 @@ public class MainMenuActivity extends AppCompatActivity
 
   @Override
   public boolean onMenuItemClick(MenuItem item) {
-    switch (item.getItemId()) {
-      case R.id.settings_color_picker:
-        mRows = 4; // because of its GameView!
-        startActivity(new Intent(MainMenuActivity.this, ColorPickerActivity.class));
-        break;
-      case R.id.settings_sign_out:
-        break;
+    int itemId = item.getItemId();
+    if (itemId == R.id.settings_color_picker) {
+      mRows = 4; // because of its GameView!
+      startActivity(new Intent(MainMenuActivity.this, ColorPickerActivity.class));
+    } else if (itemId == R.id.settings_sign_out) {
+      // Sign-out is not currently implemented.
     }
     return false;
   }
 
   // Buttons:
   public void onButtonsClick(View view) {
-    switch (view.getId()) {
-      case R.id.btn_start_4x4:
-        StartGame(4);
-        break;
-      case R.id.btn_start_5x5:
-        StartGame(5);
-        break;
-      case R.id.btn_start_6x6:
-        StartGame(6);
-        break;
-      case R.id.btn_show_achievements:
-        try {
-          onShowAchievementsRequested();
-        } catch (Exception e) {
-          Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_SHORT).show();
-        }
-        break;
-      case R.id.btn_show_leaderboards:
-        try {
-          onShowLeaderboardsRequested();
-        } catch (Exception e) {
-          Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_SHORT).show();
-        }
-        break;
-      case R.id.btn_share:
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(
-            Intent.EXTRA_TEXT,
-            getString(R.string.get_from_playstore) + "\n\n" + getString(R.string.url_google_play)+this.getPackageName());
+    int viewId = view.getId();
+    if (viewId == R.id.btn_start_4x4) {
+      StartGame(4);
+    } else if (viewId == R.id.btn_start_5x5) {
+      StartGame(5);
+    } else if (viewId == R.id.btn_start_6x6) {
+      StartGame(6);
+    } else if (viewId == R.id.btn_show_achievements) {
+      try {
+        onShowAchievementsRequested();
+      } catch (Exception e) {
+        Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_SHORT).show();
+      }
+    } else if (viewId == R.id.btn_show_leaderboards) {
+      try {
+        onShowLeaderboardsRequested();
+      } catch (Exception e) {
+        Toast.makeText(this, getString(R.string.try_again), Toast.LENGTH_SHORT).show();
+      }
+    } else if (viewId == R.id.btn_share) {
+      Intent shareIntent = new Intent(Intent.ACTION_SEND);
+      shareIntent.setType("text/plain");
+      shareIntent.putExtra(
+          Intent.EXTRA_TEXT,
+          getString(R.string.get_from_playstore)
+              + "\n\n"
+              + getString(R.string.url_google_play)
+              + this.getPackageName());
+      startActivity(Intent.createChooser(shareIntent, getString(R.string.share_title)));
+    } else if (viewId == R.id.btn_rate) {
+      try {
+        startActivity(
+            new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("market://details?id=" + this.getPackageName())));
+      } catch (ActivityNotFoundException e) {
+        startActivity(
+            new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(getString(R.string.url_google_play) + this.getPackageName())));
+      }
+    } else if (viewId == R.id.btn_settings) {
+      PopupMenu popup = new PopupMenu(this, view);
+      popup.setOnMenuItemClickListener(this); // to implement on click event on items of menu
+      MenuInflater inflater = popup.getMenuInflater();
+      inflater.inflate(R.menu.menus, popup.getMenu());
+      popup.show();
+    } else if (viewId == R.id.btn_send_email) {
+      String[] recipients = {getString(R.string.email_support_address)};
+      Intent emailIntent = new Intent(Intent.ACTION_SEND);
 
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_title)));
-        break;
-      case R.id.btn_rate:
-          try {
-              startActivity(new Intent(Intent.ACTION_VIEW,
-                      Uri.parse("market://details?id=" + this.getPackageName())));
-          } catch (android.content.ActivityNotFoundException e) {
-              startActivity(new Intent(Intent.ACTION_VIEW,
-                      Uri.parse(getString(R.string.url_google_play) + this.getPackageName())));
-          }
-        break;
-      case R.id.btn_settings:
-        PopupMenu popup = new PopupMenu(this, view);
-        popup.setOnMenuItemClickListener(this); // to implement on click event on items of menu
-        MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(R.menu.menus, popup.getMenu());
-        popup.show();
-        break;
-      case R.id.btn_send_email:
-        String[] TO = {getString(R.string.email_support_address)};
-        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+      emailIntent.setData(Uri.parse("mailto:"));
+      emailIntent.setType("text/plain");
 
-        emailIntent.setData(Uri.parse("mailto:"));
-        emailIntent.setType("text/plain");
+      emailIntent.putExtra(Intent.EXTRA_EMAIL, recipients);
+      emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
 
-        emailIntent.putExtra(Intent.EXTRA_EMAIL, TO);
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
-
-        try {
-          emailIntent.setPackage("com.google.android.gm");
-          startActivity(emailIntent);
-        } catch (ActivityNotFoundException ex) {
-          emailIntent.setPackage("");
-          startActivity(Intent.createChooser(emailIntent, getString(R.string.email_send_title)));
-        } catch (Exception e) {
-          Toast.makeText(
-                  MainMenuActivity.this, getString(R.string.email_client_error), Toast.LENGTH_SHORT)
-              .show();
-        }
+      try {
+        emailIntent.setPackage("com.google.android.gm");
+        startActivity(emailIntent);
+      } catch (ActivityNotFoundException ex) {
+        emailIntent.setPackage("");
+        startActivity(Intent.createChooser(emailIntent, getString(R.string.email_send_title)));
+      } catch (Exception e) {
+        Toast.makeText(
+                MainMenuActivity.this, getString(R.string.email_client_error), Toast.LENGTH_SHORT)
+            .show();
+      }
     }
   }
 
