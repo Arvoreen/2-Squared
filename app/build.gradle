@@ -17,8 +17,8 @@ android {
         applicationId 'com.azurenight.g2048'
         minSdk 26
         targetSdk 37
-        versionCode project.findProperty('ciVersionCode')?.toInteger() ?: 101
-        versionName project.findProperty('ciVersionName')?.toString() ?: '1.2'
+        versionCode project.findProperty('ciVersionCode')?.toInteger() ?: 103
+        versionName project.findProperty('ciVersionName')?.toString() ?: '1.3'
     }
     if (hasReleaseSigning) {
         signingConfigs {

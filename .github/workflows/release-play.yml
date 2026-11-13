@@ -31,8 +31,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Install Android 17 SDK platform
-        run: sdkmanager "platforms;android-37"
+      - name: Install Android CLI
+        run: |
+          curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install Android 17 preview SDK
+        run: android sdk install --canary platforms/android-37
 
       - name: Calculate version code
         id: version_code
@@ -40,15 +45,15 @@ jobs:
           ANDROID_VERSION_CODE_BASE: ${{ vars.ANDROID_VERSION_CODE_BASE }}
           ANDROID_VERSION_NAME_BASE: ${{ vars.ANDROID_VERSION_NAME_BASE }}
         run: |
-          code_base="${ANDROID_VERSION_CODE_BASE:-101}"
+          code_base="${ANDROID_VERSION_CODE_BASE:-103}"
           if ! [[ "$code_base" =~ ^[0-9]+$ ]]; then
             echo "ANDROID_VERSION_CODE_BASE must be a non-negative integer." >&2
             exit 1
           fi
 
-          name_base="${ANDROID_VERSION_NAME_BASE:-1.2}"
+          name_base="${ANDROID_VERSION_NAME_BASE:-1.3}"
           if ! [[ "$name_base" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
-            echo "ANDROID_VERSION_NAME_BASE must be a dotted numeric version such as 1.2." >&2
+            echo "ANDROID_VERSION_NAME_BASE must be a dotted numeric version such as 1.3." >&2
             exit 1
           fi
 

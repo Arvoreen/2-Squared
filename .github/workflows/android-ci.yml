@@ -31,8 +31,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Install Android 17 SDK platform
-        run: sdkmanager "platforms;android-37"
+      - name: Install Android CLI
+        run: |
+          curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install Android 17 preview SDK
+        run: android sdk install --canary platforms/android-37
 
       - name: Run tests, lint, and debug build
         run: ./gradlew --no-daemon -PciBuild test lint assembleDebug
